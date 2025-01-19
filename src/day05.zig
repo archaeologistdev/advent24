@@ -185,7 +185,7 @@ test "part 1" {
         try list.append(line);
     }
 
-    try testing.expect(try part1(list, std.testing.allocator) == 143);
+    try testing.expectEqual(143, try part1(list, std.testing.allocator));
 }
 
 test "part 2" {
@@ -226,5 +226,5 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expect(try part2(list, std.testing.allocator) == 123);
+    try testing.expectEqual(123, try part2(list, std.testing.allocator));
 }

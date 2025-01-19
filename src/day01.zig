@@ -76,7 +76,7 @@ test "day 1 part 1" {
         try list.append(line);
     }
 
-    try testing.expect(try part1(list, std.testing.allocator) == 11);
+    try testing.expectEqual(11, try part1(list, std.testing.allocator));
 }
 
 test "day 1 part 2" {
@@ -95,5 +95,5 @@ test "day 1 part 2" {
         try list.append(line);
     }
 
-    try testing.expect(try part2(list, std.testing.allocator) == 31);
+    try testing.expectEqual(31, try part2(list, std.testing.allocator));
 }

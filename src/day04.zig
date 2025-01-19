@@ -139,7 +139,7 @@ test "part 1" {
         try list.append(line);
     }
 
-    try testing.expect(try part1(list, std.testing.allocator) == 18);
+    try testing.expectEqual(18, try part1(list, std.testing.allocator));
 }
 
 test "part 2" {
@@ -162,5 +162,5 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expect(try part2(list, std.testing.allocator) == 9);
+    try testing.expectEqual(9, try part2(list, std.testing.allocator));
 }
