@@ -37,8 +37,8 @@ fn calculate(alloc: std.mem.Allocator, comptime n: usize, items: []const u8) !us
                 const h1 = try std.fmt.parseUnsigned(u64, digits[0..h], 10);
                 const h2 = try std.fmt.parseUnsigned(u64, digits[h..], 10);
                 const prev1 = try stones.getOrPutValue(h1, 0);
-                const prev2 = try stones.getOrPutValue(h2, 0);
                 prev1.value_ptr.* += v;
+                const prev2 = try stones.getOrPutValue(h2, 0);
                 prev2.value_ptr.* += v;
             } else {
                 const prev = try stones.getOrPutValue(s * 2024, 0);
@@ -87,7 +87,5 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expect(65601038650482 != try part2(list, std.testing.allocator));
-
-    // 259593207043312 too low
+    try testing.expectEqual(65601038650482, try part2(list, std.testing.allocator));
 }
