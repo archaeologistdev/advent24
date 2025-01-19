@@ -19,7 +19,7 @@ pub fn main() !void {
         var reader = file.reader();
 
         var lines = std.ArrayList([]const u8).init(alloc);
-        while (try reader.readUntilDelimiterOrEofAlloc(alloc, '\n', 512)) |line| {
+        while (try reader.readUntilDelimiterOrEofAlloc(alloc, '\n', 4096)) |line| {
             // std.debug.print("{any}", .{line});
             try lines.append(line);
         }
