@@ -24,7 +24,7 @@ pub fn main() !void {
             try lines.append(line);
         }
         std.debug.print("read {d} lines\n", .{lines.items.len});
-        try stdout.print("{d}\n", .{try root.day1_part1(lines, alloc)});
+        try stdout.print("{d}\n", .{try root.day1_part2(lines, alloc)});
     } else {
         std.debug.print("no args given\n", .{});
     }
