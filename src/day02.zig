@@ -1,7 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 
-pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!usize {
+pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
     var safe: u32 = 0;
     for (input.items) |report| {
         var levels = std.ArrayList(i32).init(alloc);
@@ -42,7 +42,7 @@ fn isReportSafe(levels: []i32) bool {
     return true;
 }
 
-pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!usize {
+pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
     var safe: u32 = 0;
     for (input.items) |report| {
         var levels = std.ArrayList(i32).init(alloc);
