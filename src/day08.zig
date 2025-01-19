@@ -1,13 +1,13 @@
 const std = @import("std");
 const testing = std.testing;
 
-pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     _ = input;
     _ = alloc;
     return 0;
 }
 
-pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     _ = input;
     _ = alloc;
     return 0;

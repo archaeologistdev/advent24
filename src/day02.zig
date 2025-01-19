@@ -1,7 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 
-pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     var safe: u32 = 0;
     for (input.items) |report| {
         var levels = std.ArrayList(i32).init(alloc);
@@ -42,7 +42,7 @@ fn isReportSafe(levels: []i32) bool {
     return true;
 }
 
-pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     var safe: u32 = 0;
     for (input.items) |report| {
         var levels = std.ArrayList(i32).init(alloc);
@@ -65,7 +65,7 @@ pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerro
     return safe;
 }
 
-fn isDampenedReportSafe(levels: []i32, alloc: std.mem.Allocator) anyerror!bool {
+fn isDampenedReportSafe(levels: []i32, alloc: std.mem.Allocator) !bool {
     for (0..levels.len) |i| {
         const ls = try std.mem.concat(alloc, i32, &[_][]i32{ levels[0..i], levels[i + 1 ..] });
         defer alloc.free(ls);

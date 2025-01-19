@@ -1,7 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 
-pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     var total: i64 = 0;
     for (input.items) |line| {
         const sum = try doMul(line, alloc);
@@ -10,7 +10,7 @@ pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerro
     return total;
 }
 
-fn doMul(line: []const u8, alloc: std.mem.Allocator) anyerror!i64 {
+fn doMul(line: []const u8, alloc: std.mem.Allocator) !i64 {
     var nums = std.ArrayList(i64).init(alloc);
     defer nums.deinit();
 
@@ -46,7 +46,7 @@ fn doMul(line: []const u8, alloc: std.mem.Allocator) anyerror!i64 {
     return sum;
 }
 
-pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!i64 {
+pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     var total: i64 = 0;
     const line = try std.mem.join(alloc, "", input.items);
     defer alloc.free(line);
