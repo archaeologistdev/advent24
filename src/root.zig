@@ -1,99 +1,28 @@
-const std = @import("std");
-const testing = std.testing;
+pub const day01 = @import("./day01.zig");
+pub const day02 = @import("./day02.zig");
+pub const day03 = @import("./day03.zig");
+pub const day04 = @import("./day04.zig");
+pub const day05 = @import("./day05.zig");
+pub const day06 = @import("./day06.zig");
+pub const day07 = @import("./day07.zig");
+pub const day08 = @import("./day08.zig");
+pub const day09 = @import("./day09.zig");
+pub const day10 = @import("./day10.zig");
+pub const day11 = @import("./day11.zig");
+pub const day12 = @import("./day12.zig");
+pub const day13 = @import("./day13.zig");
+pub const day14 = @import("./day14.zig");
+pub const day15 = @import("./day15.zig");
+pub const day16 = @import("./day16.zig");
+pub const day17 = @import("./day17.zig");
+pub const day18 = @import("./day18.zig");
+pub const day19 = @import("./day19.zig");
+pub const day20 = @import("./day20.zig");
+pub const day21 = @import("./day21.zig");
+pub const day22 = @import("./day22.zig");
+pub const day23 = @import("./day23.zig");
+pub const day24 = @import("./day24.zig");
 
-pub fn day1_part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!usize {
-    var list1 = std.ArrayList(u32).init(alloc);
-    defer list1.deinit();
-    var list2 = std.ArrayList(u32).init(alloc);
-    defer list2.deinit();
-    for (input.items) |item| {
-        var it = std.mem.tokenizeScalar(u8, item, ' ');
-        const fst = it.next().?;
-        const snd = it.next().?;
-
-        const first = try std.fmt.parseUnsigned(u32, fst, 10);
-        const second = try std.fmt.parseUnsigned(u32, snd, 10);
-        try list1.append(first);
-        try list2.append(second);
-    }
-    std.mem.sort(u32, list1.items, {}, comptime std.sort.asc(u32));
-    std.mem.sort(u32, list2.items, {}, comptime std.sort.asc(u32));
-
-    var result: u32 = 0;
-    for (list1.items, list2.items) |x, y| {
-        const dist = std.mem.max(u32, &[_]u32{ x, y }) - std.mem.min(u32, &[_]u32{ x, y });
-        // std.debug.print("|{d} - {d}| = {d}\n", .{ x, y, dist });
-        result += dist;
-    }
-
-    // std.debug.print("{d}\n", .{result});
-    return result;
-}
-
-pub fn day1_part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) anyerror!usize {
-    var list1 = std.ArrayList(u32).init(alloc);
-    defer list1.deinit();
-    var list2 = std.AutoHashMap(u32, u32).init(alloc);
-    defer list2.deinit();
-    for (input.items) |item| {
-        var it = std.mem.tokenizeScalar(u8, item, ' ');
-        const fst = it.next().?;
-        const snd = it.next().?;
-
-        const first = try std.fmt.parseUnsigned(u32, fst, 10);
-        const second = try std.fmt.parseUnsigned(u32, snd, 10);
-        try list1.append(first);
-        const entry = try list2.getOrPutValue(second, 0);
-        entry.value_ptr.* += 1;
-    }
-    std.mem.sort(u32, list1.items, {}, comptime std.sort.asc(u32));
-
-    var result: u32 = 0;
-    for (list1.items) |x| {
-        const y = list2.get(x) orelse 0;
-        const dist = x * y;
-        std.debug.print("|{d} * {d}| = {d}\n", .{ x, y, dist });
-        result += dist;
-    }
-
-    std.debug.print("{d}\n", .{result});
-    return result;
-}
-
-test "day 1 part 1" {
-    const input =
-        \\3   4
-        \\4   3
-        \\2   5
-        \\1   3
-        \\3   9
-        \\3   3
-    ;
-    var list = std.ArrayList([]const u8).init(std.testing.allocator);
-    defer list.deinit();
-    var it = std.mem.tokenizeScalar(u8, input, '\n');
-    while (it.next()) |line| {
-        try list.append(line);
-    }
-
-    try testing.expect(try day1_part1(list, std.testing.allocator) == 11);
-}
-
-test "day 1 part 2" {
-    const input =
-        \\3   4
-        \\4   3
-        \\2   5
-        \\1   3
-        \\3   9
-        \\3   3
-    ;
-    var list = std.ArrayList([]const u8).init(std.testing.allocator);
-    defer list.deinit();
-    var it = std.mem.tokenizeScalar(u8, input, '\n');
-    while (it.next()) |line| {
-        try list.append(line);
-    }
-
-    try testing.expect(try day1_part2(list, std.testing.allocator) == 31);
+test {
+    @import("std").testing.refAllDecls(@This());
 }
