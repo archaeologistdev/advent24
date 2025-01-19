@@ -13,7 +13,6 @@ const Free = packed struct {
 const Thing = union(enum) { file: File, space: Free };
 
 pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
-    std.debug.assert(input.items.len == 1);
     // EXAMPLE:
     //ids: 0.1.2
     //map: 12345
@@ -34,21 +33,10 @@ pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
     //        if file size < space: reduce len of space, insert file before space.
     //
 
+    std.debug.assert(input.items.len == 1);
     const in: []const u8 = input.items[0];
-    var things = try std.ArrayList(Thing).initCapacity(alloc, in.len);
+    var things = try parse_things(alloc, in);
     defer things.deinit();
-    for (in, 0..) |char, i| {
-        const digit = try std.fmt.charToDigit(char, 10);
-        if (i % 2 == 0) {
-            // even indexes contain files
-            const id: u16 = @intCast(@divExact(i, 2));
-            try things.append(Thing{ .file = File{ .id = id, .len = digit } });
-        } else {
-            // odd indexes contain empty space
-            try things.append(Thing{ .space = Free{ .len = digit } });
-        }
-    }
-    // std.debug.print("{any}", .{things.items});
 
     var result = try std.ArrayList(Thing).initCapacity(alloc, in.len);
     defer result.deinit();
@@ -95,27 +83,106 @@ pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
         }
     }
 
+    // std.debug.print("\n", .{});
+
+    // std.debug.print("{any}", .{result.items});
+
+    return @intCast(calc_checksum(result.items));
+}
+
+fn parse_things(alloc: std.mem.Allocator, in: []const u8) !std.ArrayList(Thing) {
+    var things = try std.ArrayList(Thing).initCapacity(alloc, in.len);
+    for (in, 0..) |char, i| {
+        const digit = try std.fmt.charToDigit(char, 10);
+        if (i % 2 == 0) {
+            // even indexes contain files
+            const id: u16 = @intCast(@divExact(i, 2));
+            try things.append(Thing{ .file = File{ .id = id, .len = digit } });
+        } else {
+            // odd indexes contain empty space
+            try things.append(Thing{ .space = Free{ .len = digit } });
+        }
+    }
+    // std.debug.print("{any}", .{things.items});
+    return things;
+}
+
+fn calc_checksum(items: []Thing) u64 {
     var i: u64 = 0;
     var checksum: u64 = 0;
-    for (result.items) |r| {
-        std.debug.assert(r == Thing.file);
+    for (items) |r| {
+        if (r != Thing.file) {
+            i += r.space.len;
+            continue;
+        }
+        // std.debug.assert(r == Thing.file);
         for (0..r.file.len) |_| {
             // std.debug.print("{d} * {d} = {d}\n", .{ i, r.file.id, i * r.file.id });
             checksum += i * r.file.id;
             i += 1;
         }
     }
-    // std.debug.print("\n", .{});
-
-    // std.debug.print("{any}", .{result.items});
-
-    return @intCast(checksum);
+    return checksum;
 }
 
 pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
-    _ = input;
-    _ = alloc;
-    return 0;
+    std.debug.assert(input.items.len == 1);
+    const in: []const u8 = input.items[0];
+    var things = try parse_things(alloc, in);
+    defer things.deinit();
+
+    var moved = std.AutoArrayHashMap(u64, void).init(alloc);
+    defer moved.deinit();
+
+    var i: usize = things.items.len;
+    while (i > 0) {
+        i -= 1;
+
+        // find a file, from right to left
+        const thing = things.items[i];
+        if (thing != Thing.file) continue;
+
+        // already moved
+        if (moved.contains(thing.file.id)) continue;
+
+        // std.debug.print("finding a spot for: {any}\n", .{thing.file});
+
+        // find a space to put it, from left to right
+        for (0..i) |j| {
+            const other = things.items[j];
+            if (other != Thing.space) continue;
+
+            // space too small, keep looking
+            if (other.space.len < thing.file.len) continue;
+
+            // std.debug.print("found space at: {d} of size {d}\n", .{ j, other.space.len });
+            try moved.put(thing.file.id, {});
+
+            // space is exactly the right size
+            if (other.space.len == thing.file.len) {
+                // replace space with file by swapping them
+                std.mem.swap(Thing, &things.items[i], &things.items[j]);
+            } else {
+                // space too large
+                things.items[j].space.len -= thing.file.len;
+                things.items[i] = Thing{ .space = .{ .len = thing.file.len } };
+                try things.insert(j, thing);
+            }
+
+            // std.debug.print("\n", .{});
+            // for (things.items) |x| {
+            //     switch (x) {
+            //         .space => for (0..x.space.len) |_| std.debug.print("{c}", .{'.'}),
+            //         .file => for (0..x.file.len) |_| std.debug.print("{d}", .{x.file.id}),
+            //     }
+            // }
+            // std.debug.print("\n", .{});
+            break;
+        }
+    }
+
+    // std.debug.print("\n> ", .{});
+    return @intCast(calc_checksum(things.items));
 }
 
 test "part 1" {
@@ -135,7 +202,7 @@ test "part 1" {
 
 test "part 2" {
     const input =
-        \\
+        \\2333133121414131402
     ;
     var list = std.ArrayList([]const u8).init(std.testing.allocator);
     defer list.deinit();
@@ -144,5 +211,5 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expectEqual(0, try part2(list, std.testing.allocator));
+    try testing.expectEqual(2858, try part2(list, std.testing.allocator));
 }
