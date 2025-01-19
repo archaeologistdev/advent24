@@ -93,9 +93,30 @@ fn transpose(slices: [][]const u8, alloc: std.mem.Allocator) ![][]const u8 {
 }
 
 pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
-    _ = input;
     _ = alloc;
-    return 0;
+    var sum: i64 = 0;
+
+    const xs = input.items;
+
+    for (1..xs.len - 1) |x| {
+        for (1..xs[0].len - 1) |y| {
+            if (xs[x][y] != 'A') continue;
+
+            const diag1 =
+                (xs[x - 1][y - 1] == 'M' and xs[x + 1][y + 1] == 'S') or
+                (xs[x - 1][y - 1] == 'S' and xs[x + 1][y + 1] == 'M');
+            const diag2 =
+                (xs[x - 1][y + 1] == 'M' and xs[x + 1][y - 1] == 'S') or
+                (xs[x - 1][y + 1] == 'S' and xs[x + 1][y - 1] == 'M');
+            if (diag1 and diag2) {
+                sum += 1;
+                // std.debug.print("found x at {d}, {d}\n", .{ x, y });
+            }
+        }
+    }
+
+    // std.debug.print("{d}\n", .{sum});
+    return sum;
 }
 
 test "part 1" {
@@ -123,7 +144,16 @@ test "part 1" {
 
 test "part 2" {
     const input =
-        \\
+        \\MMMSXXMASM
+        \\MSAMXMSMSA
+        \\AMXSXMAAMM
+        \\MSAMASMSMX
+        \\XMASAMXAMM
+        \\XXAMMXXAMA
+        \\SMSMSASXSS
+        \\SAXAMASAAA
+        \\MAMMMXMMMM
+        \\MXMXAXMASX
     ;
     var list = std.ArrayList([]const u8).init(std.testing.allocator);
     defer list.deinit();
@@ -132,5 +162,5 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expect(try part2(list, std.testing.allocator) == 0);
+    try testing.expect(try part2(list, std.testing.allocator) == 9);
 }
