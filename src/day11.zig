@@ -2,51 +2,54 @@ const std = @import("std");
 const testing = std.testing;
 
 pub fn part1(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
+    std.debug.assert(input.items.len == 1);
+
+    return @intCast(try calculate(alloc, 25, input.items[0]));
+}
+
+fn calculate(alloc: std.mem.Allocator, comptime n: usize, items: []const u8) !usize {
     var arena = std.heap.ArenaAllocator.init(alloc);
     const aa = arena.allocator();
     defer arena.deinit();
-    std.debug.assert(input.items.len == 1);
-    var stones = std.ArrayList(u64).init(aa);
-    var parts = std.mem.splitScalar(u8, input.items[0], ' ');
+
+    var stones = std.AutoArrayHashMap(u64, u64).init(aa);
+    var parts = std.mem.splitScalar(u8, items, ' ');
     while (parts.next()) |p| {
-        try stones.append(try std.fmt.parseUnsigned(u64, p, 10));
+        const num = try std.fmt.parseUnsigned(u64, p, 10);
+        const entry = try stones.getOrPutValue(num, 0);
+        entry.value_ptr.* += 1;
     }
 
-    var history = std.AutoArrayHashMap(u64, std.ArrayList(u64)).init(aa);
-
-    for (0..25) |_| {
-        const prev_len: usize = stones.items.len;
-        var new_len: usize = 0;
-        try stones.ensureUnusedCapacity(prev_len * 2);
-        for (stones.items) |s| {
-            const prev = try history.getOrPut(s);
-            if (!prev.found_existing) {
-                var outcomes = try std.ArrayList(u64).initCapacity(aa, 2);
-                if (s == 0) {
-                    try outcomes.append(1);
-                } else if (countDigits(s) % 2 == 0) {
-                    var buf: [20]u8 = undefined;
-                    const digits = try std.fmt.bufPrint(&buf, "{}", .{s});
-                    const h = @divExact(digits.len, 2);
-                    const h1 = try std.fmt.parseUnsigned(u64, digits[0..h], 10);
-                    const h2 = try std.fmt.parseUnsigned(u64, digits[h..], 10);
-                    try outcomes.appendSlice(&[_]u64{ h1, h2 });
-                } else {
-                    try outcomes.append(s * 2024);
-                }
-                prev.value_ptr.* = outcomes;
+    for (0..n) |_| {
+        const before = try stones.clone();
+        stones.clearRetainingCapacity();
+        var it = before.iterator();
+        while (it.next()) |entry| {
+            const s = entry.key_ptr.*;
+            const v = entry.value_ptr.*;
+            if (s == 0) {
+                const prev = try stones.getOrPutValue(1, 0);
+                prev.value_ptr.* += v;
+            } else if (countDigits(s) % 2 == 0) {
+                var buf: [20]u8 = undefined;
+                const digits = try std.fmt.bufPrint(&buf, "{}", .{s});
+                const h = @divExact(digits.len, 2);
+                const h1 = try std.fmt.parseUnsigned(u64, digits[0..h], 10);
+                const h2 = try std.fmt.parseUnsigned(u64, digits[h..], 10);
+                const prev1 = try stones.getOrPutValue(h1, 0);
+                const prev2 = try stones.getOrPutValue(h2, 0);
+                prev1.value_ptr.* += v;
+                prev2.value_ptr.* += v;
+            } else {
+                const prev = try stones.getOrPutValue(s * 2024, 0);
+                prev.value_ptr.* += v;
             }
-            // don't invalidate pointers
-            stones.appendSliceAssumeCapacity(prev.value_ptr.*.items);
-            new_len += prev.value_ptr.*.items.len;
         }
-        // to avoid aliasing, copy in 2 steps
-        stones.replaceRangeAssumeCapacity(0, prev_len, stones.items[prev_len .. prev_len * 2]);
-        stones.replaceRangeAssumeCapacity(prev_len, prev_len, stones.items[prev_len * 2 ..]);
-        stones.shrinkRetainingCapacity(new_len);
     }
 
-    return @intCast(stones.items.len);
+    var total: usize = 0;
+    for (stones.values()) |v| total += v;
+    return total;
 }
 
 inline fn countDigits(n: u64) u64 {
@@ -55,9 +58,8 @@ inline fn countDigits(n: u64) u64 {
 }
 
 pub fn part2(input: std.ArrayList([]const u8), alloc: std.mem.Allocator) !i64 {
-    _ = input;
-    _ = alloc;
-    return 0;
+    std.debug.assert(input.items.len == 1);
+    return @intCast(try calculate(alloc, 75, input.items[0]));
 }
 
 test "part 1" {
@@ -76,7 +78,7 @@ test "part 1" {
 
 test "part 2" {
     const input =
-        \\
+        \\125 17
     ;
     var list = std.ArrayList([]const u8).init(std.testing.allocator);
     defer list.deinit();
@@ -85,5 +87,7 @@ test "part 2" {
         try list.append(line);
     }
 
-    try testing.expectEqual(0, try part2(list, std.testing.allocator));
+    try testing.expect(65601038650482 != try part2(list, std.testing.allocator));
+
+    // 259593207043312 too low
 }
